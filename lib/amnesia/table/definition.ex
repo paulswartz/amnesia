@@ -111,7 +111,7 @@ defmodule Amnesia.Table.Definition do
         @doc """
         Return the database the table belongs to.
         """
-        @spec database :: module
+        @spec database :: unquote(database)
         def database do
           @database
         end
@@ -135,7 +135,7 @@ defmodule Amnesia.Table.Definition do
         @doc """
         Get the name of the id key.
         """
-        @spec id :: atom
+        @spec id :: unquote(attributes |> Enum.at(0) |> elem(0))
         def id do
           unquote(attributes |> Enum.at(0) |> elem(0))
         end
@@ -193,8 +193,8 @@ defmodule Amnesia.Table.Definition do
         @doc """
         Create the table with the given copying mode and inherent definition.
         """
-        @spec create :: Amnesia.o
-        @spec create(T.c) :: Amnesia.o
+        @spec create :: T.o
+        @spec create(T.c) :: T.o
         def create(copying \\ []) do
           T.create(__MODULE__, D.attributes(@attributes, @options, @index, copying))
         end
@@ -413,6 +413,7 @@ defmodule Amnesia.Table.Definition do
           """
           @spec read(any) :: [t] | nil | no_return
           @spec read(any, :read | :write | :write!) :: [t] | nil | no_return
+          @dialyzer {:no_match, read: 1, read: 2} # keeps the hook_read from complaining
           def read(key, lock \\ :read) do
             records = coerce(T.read(__MODULE__, key, lock))
 
@@ -429,6 +430,7 @@ defmodule Amnesia.Table.Definition do
           Read records from the table, see `mnesia:dirty_read`.
           """
           @spec read!(any) :: [t] | nil | no_return
+          @dialyzer {:no_match, read!: 1}
           def read!(key) do
             records = coerce(T.read!(__MODULE__, key))
 
@@ -454,6 +456,7 @@ defmodule Amnesia.Table.Definition do
           """
           @spec read(any) :: t | nil | no_return
           @spec read(any, :read | :write | :write!) :: t | nil | no_return
+          @dialyzer {:no_match, read: 1, read: 2}
           def read(key, lock \\ :read) do
             record = case T.read(__MODULE__, key, lock) do
               [r] -> coerce(r)
@@ -475,6 +478,7 @@ defmodule Amnesia.Table.Definition do
           Unlike `mnesia:dirty_read` this returns either the record or nil.
           """
           @spec read!(any) :: t | nil | no_return
+          @dialyzer {:no_match, read!: 1}
           def read!(key) do
             record = case T.read!(__MODULE__, key) do
               [r] -> coerce(r)
@@ -530,7 +534,7 @@ defmodule Amnesia.Table.Definition do
         """
         @spec at!(integer) :: t | nil | no_return
         def at!(position) do
-          T.at!(__MODULE__, position)
+          coerce(T.at!(__MODULE__, position))
         end
 
         @doc """
@@ -694,7 +698,7 @@ defmodule Amnesia.Table.Definition do
         @doc """
         Select records in the table using a match_spec, see `mnesia:select`.
         """
-        @spec select(any) :: T.Selection.t | nil | no_return
+        @spec select(maybe_improper_list) :: S.t | nil | no_return
         def select(spec) do
           T.select(__MODULE__, spec)
         end
@@ -703,7 +707,7 @@ defmodule Amnesia.Table.Definition do
         Select records in the given table using a match_spec passing a limit or a
         lock kind, see `mnesia:select`.
         """
-        @spec select(integer | :read | :write, any) :: T.Selection.t | nil | no_return
+        @spec select(integer | :read | :write, maybe_improper_list) :: S.t | nil | no_return
         def select(lock_or_limit, spec) do
           T.select(__MODULE__, lock_or_limit, spec)
         end
@@ -712,7 +716,7 @@ defmodule Amnesia.Table.Definition do
         Select records in the given table using a match_spec passing a limit and a
         lock kind, see `mnesia:select`.
         """
-        @spec select(integer | :read | :write, integer | :read | :write, integer) :: T.Selection.t | nil | no_return
+        @spec select(integer | :read | :write, integer | :read | :write, maybe_improper_list) :: S.t | nil | no_return
         def select(lock_or_limit, limit_or_lock, spec) do
           T.select(__MODULE__, lock_or_limit, limit_or_lock, spec)
         end
@@ -721,7 +725,7 @@ defmodule Amnesia.Table.Definition do
         Select records in the table using a match_spec, see
         `mnesia:dirty_select`.
         """
-        @spec select!(any) :: Selection.t | nil | no_return
+        @spec select!(maybe_improper_list) :: S.t | nil | no_return
         def select!(spec) do
           T.select!(__MODULE__, spec)
         end
@@ -898,6 +902,7 @@ defmodule Amnesia.Table.Definition do
         counter if `nil`.
         """
         @spec write(t) :: t | no_return
+        @dialyzer {:no_match, [write: 1, write: 2]}
         def write(self, lock \\ :write) do
           self = D.autoincrement(__MODULE__, @database, @autoincrement, self)
 
@@ -919,6 +924,7 @@ defmodule Amnesia.Table.Definition do
         counter if `nil`.
         """
         @spec write!(t) :: t | no_return
+        @dialyzer {:no_match, [write!: 1]}
         def write!(self) do
           self = D.autoincrement(__MODULE__, @database, @autoincrement, self)
 

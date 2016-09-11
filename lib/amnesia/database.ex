@@ -77,8 +77,8 @@ defmodule Amnesia.Database do
         Create the database, it calls `.create` on every defined table, raises
         in case of error.
         """
-        @spec create! :: [Amnesia.Table.o]
-        @spec create!(Amnesia.Table.c) :: [Amnesia.Table.o]
+        @spec create! :: :ok
+        @spec create!(Amnesia.Table.c) :: :ok
         def create!(copying \\ []) do
           metadata |> Metadata.create!(copying: copying)
 
@@ -103,7 +103,7 @@ defmodule Amnesia.Database do
         Destroy the database, it calls `.destroy` on every defined table,
         raises in case of error.
         """
-        @spec destroy! :: [Amnesia.Table.o]
+        @spec destroy! :: :ok
         def destroy! do
           metadata |> Metadata.destroy!
 

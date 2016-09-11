@@ -11,6 +11,14 @@ defmodule Amnesia.Table.Stream do
 
   alias __MODULE__, as: S
 
+  @type t :: %S{
+    table: Amnesia.Table.o,
+    type: :set | :ordered_set | :bag,
+    lock: :read | :write | :write!,
+    dirty: boolean,
+    reverse: boolean
+  }
+
   def new(name, type, options) do
     lock    = Keyword.get(options, :lock,    :read)
     dirty   = Keyword.get(options, :dirty,   false)
